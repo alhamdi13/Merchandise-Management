@@ -70,11 +70,21 @@
                     </div>
                     <div class="bg-white p-4 md:p-6 rounded-lg shadow-md border-l-4 border-green-500">
                         <p class="text-xs md:text-sm text-gray-500 uppercase font-bold">Item Terjual (Berbayar)</p>
-                        <p class="text-2xl md:text-3xl font-bold text-slate-800 mt-2" id="stat-item-bayar">0</p>
+                        <p class="text-2xl md:text-3xl font-bold text-slate-800 mt-2 mb-2" id="stat-item-bayar">0</p>
+                        <div class="flex justify-between text-xs text-gray-600 border-t pt-2">
+                            <span>Baju: <b id="stat-baju-bayar">0</b></span>
+                            <span>Topi: <b id="stat-topi-bayar">0</b></span>
+                            <span>Tumbler: <b id="stat-tumbler-bayar">0</b></span>
+                        </div>
                     </div>
                     <div class="bg-white p-4 md:p-6 rounded-lg shadow-md border-l-4 border-orange-500">
                         <p class="text-xs md:text-sm text-gray-500 uppercase font-bold">Item Free Gift</p>
-                        <p class="text-2xl md:text-3xl font-bold text-slate-800 mt-2" id="stat-item-free">0</p>
+                        <p class="text-2xl md:text-3xl font-bold text-slate-800 mt-2 mb-2" id="stat-item-free">0</p>
+                        <div class="flex justify-between text-xs text-gray-600 border-t pt-2">
+                            <span>Baju: <b id="stat-baju-free">0</b></span>
+                            <span>Topi: <b id="stat-topi-free">0</b></span>
+                            <span>Tumbler: <b id="stat-tumbler-free">0</b></span>
+                        </div>
                     </div>
                     <div class="bg-white p-4 md:p-6 rounded-lg shadow-md border-l-4 border-purple-500">
                         <p class="text-xs md:text-sm text-gray-500 uppercase font-bold">Total Pembeli</p>
@@ -333,8 +343,14 @@
         <table class="w-1/2 mb-8">
             <tr><td class="font-bold w-1/2">Total Pendapatan</td><td id="print-pendapatan">Rp 0</td></tr>
             <tr><td class="font-bold">Total Item Terjual</td><td id="print-item-bayar">0</td></tr>
-            <tr><td class="font-bold">Total Item Free Gift</td><td id="print-item-free">0</td></tr>
-            <tr><td class="font-bold">Total Pembeli</td><td id="print-pembeli">0</td></tr>
+            <tr><td class="pl-4 border-none pt-0 pb-0">- Baju Terjual</td><td class="border-none pt-0 pb-0" id="print-baju-bayar">0</td></tr>
+            <tr><td class="pl-4 border-none pt-0 pb-0">- Topi Terjual</td><td class="border-none pt-0 pb-0" id="print-topi-bayar">0</td></tr>
+            <tr><td class="pl-4 border-none pt-0 pb-2">- Tumbler Terjual</td><td class="border-none pt-0 pb-2" id="print-tumbler-bayar">0</td></tr>
+            <tr><td class="font-bold border-t">Total Item Free Gift</td><td class="border-t" id="print-item-free">0</td></tr>
+            <tr><td class="pl-4 border-none pt-0 pb-0">- Baju Free Gift</td><td class="border-none pt-0 pb-0" id="print-baju-free">0</td></tr>
+            <tr><td class="pl-4 border-none pt-0 pb-0">- Topi Free Gift</td><td class="border-none pt-0 pb-0" id="print-topi-free">0</td></tr>
+            <tr><td class="pl-4 border-none pt-0 pb-2">- Tumbler Free Gift</td><td class="border-none pt-0 pb-2" id="print-tumbler-free">0</td></tr>
+            <tr><td class="font-bold border-t">Total Pembeli</td><td class="border-t" id="print-pembeli">0</td></tr>
         </table>
 
         <h2 class="text-xl font-bold mb-4">Data Transaksi Pembeli</h2>
@@ -469,7 +485,15 @@
         function kalkulasiDasbor() {
             let totalPendapatan = 0;
             let totalItemBayar = 0;
+            let totalBajuBayar = 0;
+            let totalTopiBayar = 0;
+            let totalTumblerBayar = 0;
+            
             let totalItemFree = 0;
+            let totalBajuFree = 0;
+            let totalTopiFree = 0;
+            let totalTumblerFree = 0;
+            
             let totalPembeli = 0;
             let totalSponsor = 0;
             let totalPenerimaFree = 0;
@@ -484,10 +508,18 @@
                 }
 
                 const counts = tr.querySelectorAll('.item-count');
-                counts.forEach(c => {
-                    const val = parseInt(c.innerText);
-                    if(!isNaN(val)) { totalItemBayar += val; isEmpty = false; }
-                });
+                if (counts.length >= 3) {
+                    const baju = parseInt(counts[0].innerText) || 0;
+                    const topi = parseInt(counts[1].innerText) || 0;
+                    const tumbler = parseInt(counts[2].innerText) || 0;
+                    
+                    totalBajuBayar += baju;
+                    totalTopiBayar += topi;
+                    totalTumblerBayar += tumbler;
+                    totalItemBayar += (baju + topi + tumbler);
+                    
+                    if(baju > 0 || topi > 0 || tumbler > 0) isEmpty = false;
+                }
 
                 if(!isEmpty) totalPembeli++;
             });
@@ -496,10 +528,18 @@
             barisFree.forEach(tr => {
                 let isEmpty = true;
                 const counts = tr.querySelectorAll('.free-count');
-                counts.forEach(c => {
-                    const val = parseInt(c.innerText);
-                    if(!isNaN(val)) { totalItemFree += val; isEmpty = false; }
-                });
+                if (counts.length >= 3) {
+                    const baju = parseInt(counts[0].innerText) || 0;
+                    const topi = parseInt(counts[1].innerText) || 0;
+                    const tumbler = parseInt(counts[2].innerText) || 0;
+                    
+                    totalBajuFree += baju;
+                    totalTopiFree += topi;
+                    totalTumblerFree += tumbler;
+                    totalItemFree += (baju + topi + tumbler);
+                    
+                    if(baju > 0 || topi > 0 || tumbler > 0) isEmpty = false;
+                }
                 if(!isEmpty) totalPenerimaFree++;
             });
 
@@ -511,15 +551,33 @@
             const formatRupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalPendapatan);
 
             document.getElementById('stat-pendapatan').innerText = formatRupiah;
+            
             document.getElementById('stat-item-bayar').innerText = totalItemBayar;
+            document.getElementById('stat-baju-bayar').innerText = totalBajuBayar;
+            document.getElementById('stat-topi-bayar').innerText = totalTopiBayar;
+            document.getElementById('stat-tumbler-bayar').innerText = totalTumblerBayar;
+            
             document.getElementById('stat-item-free').innerText = totalItemFree;
+            document.getElementById('stat-baju-free').innerText = totalBajuFree;
+            document.getElementById('stat-topi-free').innerText = totalTopiFree;
+            document.getElementById('stat-tumbler-free').innerText = totalTumblerFree;
+            
             document.getElementById('stat-pembeli').innerText = totalPembeli;
             document.getElementById('stat-penerima-free').innerText = totalPenerimaFree;
             document.getElementById('stat-sponsor').innerText = totalSponsor;
 
             document.getElementById('print-pendapatan').innerText = formatRupiah;
+            
             document.getElementById('print-item-bayar').innerText = totalItemBayar;
+            document.getElementById('print-baju-bayar').innerText = totalBajuBayar;
+            document.getElementById('print-topi-bayar').innerText = totalTopiBayar;
+            document.getElementById('print-tumbler-bayar').innerText = totalTumblerBayar;
+            
             document.getElementById('print-item-free').innerText = totalItemFree;
+            document.getElementById('print-baju-free').innerText = totalBajuFree;
+            document.getElementById('print-topi-free').innerText = totalTopiFree;
+            document.getElementById('print-tumbler-free').innerText = totalTumblerFree;
+            
             document.getElementById('print-pembeli').innerText = totalPembeli;
         }
 
