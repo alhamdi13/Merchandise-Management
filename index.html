@@ -160,7 +160,12 @@
                                 </td>
                                 <td class="py-3 px-4 item-total font-bold" contenteditable="true">220000</td>
                                 <td class="py-3 px-4" contenteditable="true">+62 813-7221-6326</td>
-                                <td class="py-3 px-4 font-bold text-green-600 text-center" contenteditable="true">Lunas</td>
+                                <td class="py-3 px-4 text-center">
+                                    <select class="border border-gray-300 rounded p-1 font-bold text-green-600" onchange="this.className = this.value === 'Lunas' ? 'border border-gray-300 rounded p-1 font-bold text-green-600' : 'border border-gray-300 rounded p-1 font-bold text-red-500'">
+                                        <option value="Lunas" selected>Lunas</option>
+                                        <option value="Belum">Belum</option>
+                                    </select>
+                                </td>
                             </tr>
                             <tr class="border-b hover:bg-gray-50">
                                 <td class="py-3 px-4" contenteditable="true">2</td>
@@ -188,7 +193,12 @@
                                 </td>
                                 <td class="py-3 px-4 item-total font-bold" contenteditable="true">340000</td>
                                 <td class="py-3 px-4" contenteditable="true">+62 857-6070-5898</td>
-                                <td class="py-3 px-4 font-bold text-red-500 text-center" contenteditable="true">Belum</td>
+                                <td class="py-3 px-4 text-center">
+                                    <select class="border border-gray-300 rounded p-1 font-bold text-red-500" onchange="this.className = this.value === 'Lunas' ? 'border border-gray-300 rounded p-1 font-bold text-green-600' : 'border border-gray-300 rounded p-1 font-bold text-red-500'">
+                                        <option value="Lunas">Lunas</option>
+                                        <option value="Belum" selected>Belum</option>
+                                    </select>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -388,7 +398,16 @@
                 if (tabelId === 'tabel-pembeli') {
                     if(i >= 3 && i <= 5) kelas += " item-count";
                     if(i === 8) kelas += " item-total font-bold";
-                    if(i === 10) kelas += " text-center";
+                    
+                    if(i === 10) {
+                        html += `<td class="py-3 px-4 text-center">
+                            <select class="border border-gray-300 rounded p-1 font-bold text-red-500" onchange="this.className = this.value === 'Lunas' ? 'border border-gray-300 rounded p-1 font-bold text-green-600' : 'border border-gray-300 rounded p-1 font-bold text-red-500'">
+                                <option value="Belum" selected>Belum</option>
+                                <option value="Lunas">Lunas</option>
+                            </select>
+                        </td>`;
+                        continue;
+                    }
 
                     if(i === 6) {
                         html += `<td class="${kelas}">
@@ -568,7 +587,12 @@
                                 </td>
                                 <td class="py-3 px-4 item-total font-bold" contenteditable="true">${cols[12] || '0'}</td>
                                 <td class="py-3 px-4" contenteditable="true">${cols[13] || '-'}</td>
-                                <td class="py-3 px-4 text-center" contenteditable="true">-</td>
+                                <td class="py-3 px-4 text-center">
+                                    <select class="border border-gray-300 rounded p-1 font-bold text-red-500" onchange="this.className = this.value === 'Lunas' ? 'border border-gray-300 rounded p-1 font-bold text-green-600' : 'border border-gray-300 rounded p-1 font-bold text-red-500'">
+                                        <option value="Belum" selected>Belum</option>
+                                        <option value="Lunas">Lunas</option>
+                                    </select>
+                                </td>
                             `;
                             tr.innerHTML = html;
                         } else {
