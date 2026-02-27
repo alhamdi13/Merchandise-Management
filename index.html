@@ -180,7 +180,7 @@
                                 <th class="py-3 px-4 text-center">Status Bayar</th>
                             </tr>
                         </thead>
-                        <tbody class="text-xs md:text-sm text-gray-700" onkeyup="hitungSemuaTotalBaris(); kalkulasiDasbor()">
+                        <tbody class="text-xs md:text-sm text-gray-700" oninput="hitungSemuaTotalBaris(); kalkulasiDasbor()">
                             <tr class="border-b hover:bg-gray-50">
                                 <td class="py-3 px-4" contenteditable="true">1</td>
                                 <td class="py-3 px-4" contenteditable="true">Fuji Kurniansyah</td>
@@ -277,7 +277,7 @@
                                 <th class="py-3 px-4">Keterangan</th>
                             </tr>
                         </thead>
-                        <tbody class="text-xs md:text-sm text-gray-700" onkeyup="kalkulasiDasbor()">
+                        <tbody class="text-xs md:text-sm text-gray-700" oninput="kalkulasiDasbor()">
                             <tr class="border-b hover:bg-gray-50">
                                 <td class="py-3 px-4" contenteditable="true">1</td>
                                 <td class="py-3 px-4" contenteditable="true">Bapak Rektor</td>
@@ -333,7 +333,7 @@
                                 <th class="py-3 px-4">Detail Kesepakatan</th>
                             </tr>
                         </thead>
-                        <tbody class="text-xs md:text-sm text-gray-700" onkeyup="kalkulasiDasbor()">
+                        <tbody class="text-xs md:text-sm text-gray-700" oninput="kalkulasiDasbor()">
                             <tr class="border-b hover:bg-gray-50">
                                 <td class="py-3 px-4" contenteditable="true">Sponsor 1</td>
                                 <td class="py-3 px-4 sponsor-count" contenteditable="true">Rp 5.000.000</td>
@@ -553,6 +553,7 @@
             }
             tr.innerHTML = html;
             tbody.appendChild(tr);
+            kalkulasiDasbor();
         }
 
         function kalkulasiDasbor() {
@@ -698,7 +699,35 @@
             setVal('print-tumbler-free', totalTumblerFree);
             
             setVal('print-pembeli', totalPembeli);
+
+            simpanKeLokal();
         }
+
+        function simpanKeLokal() {
+            localStorage.setItem('dataPembeli', document.getElementById('tabel-pembeli').querySelector('tbody').innerHTML);
+            localStorage.setItem('dataFreegift', document.getElementById('tabel-freegift').querySelector('tbody').innerHTML);
+            localStorage.setItem('dataSponsor', document.getElementById('tabel-sponsor').querySelector('tbody').innerHTML);
+        }
+
+        function muatDariLokal() {
+            const dataPembeli = localStorage.getItem('dataPembeli');
+            const dataFreegift = localStorage.getItem('dataFreegift');
+            const dataSponsor = localStorage.getItem('dataSponsor');
+
+            if (dataPembeli) document.getElementById('tabel-pembeli').querySelector('tbody').innerHTML = dataPembeli;
+            if (dataFreegift) document.getElementById('tabel-freegift').querySelector('tbody').innerHTML = dataFreegift;
+            if (dataSponsor) document.getElementById('tabel-sponsor').querySelector('tbody').innerHTML = dataSponsor;
+        }
+
+        document.addEventListener('change', function(e) {
+            if (e.target.tagName === 'SELECT') {
+                const options = e.target.querySelectorAll('option');
+                options.forEach(opt => opt.removeAttribute('selected'));
+                e.target.options[e.target.selectedIndex].setAttribute('selected', 'selected');
+                hitungSemuaTotalBaris();
+                kalkulasiDasbor();
+            }
+        });
 
         window.onbeforeprint = function() {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -849,6 +878,7 @@
             reader.readAsText(file);
         }
 
+        muatDariLokal();
         hitungSemuaTotalBaris();
         kalkulasiDasbor();
     </script>
