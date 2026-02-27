@@ -16,17 +16,29 @@
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         @media print {
-            body { background-color: #ffffff; }
+            body { background-color: #ffffff; color: #1f2937; font-size: 11pt; }
             .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            .tab-content { display: block !important; }
-            #katalog-section, #impor-section { display: none !important; }
+            .print-only { display: block !important; padding: 0; }
+            .tab-content { display: none !important; }
+            
             table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-            th, td { border: 1px solid #000; padding: 8px; text-align: left; white-space: normal; }
-            h1, h2 { color: #000; }
-            .shadow-lg { box-shadow: none !important; }
+            th, td { border: 1px solid #d1d5db; padding: 8px 12px; text-align: left; white-space: normal; }
+            th { background-color: #f3f4f6 !important; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            
+            h1 { font-size: 16pt; font-weight: bold; border-bottom: 2px solid #1f2937; padding-bottom: 10px; margin-bottom: 5px; text-transform: uppercase; text-align: center; }
+            h2 { font-size: 12pt; font-weight: bold; margin-top: 20px; margin-bottom: 10px; color: #374151; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
+            
+            .shadow-lg, .shadow-md { box-shadow: none !important; }
             .rounded-lg { border-radius: 0 !important; }
             .print-break { page-break-before: always; }
+            
+            .text-right { text-align: right !important; }
+            .text-center { text-align: center !important; }
+            
+            .print-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+            .print-summary-box { border: 1px solid #d1d5db; padding: 10px; }
+            .print-summary-title { font-size: 9pt; color: #6b7280; text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
+            .print-summary-value { font-size: 14pt; font-weight: bold; }
         }
     </style>
 </head>
@@ -335,34 +347,51 @@
         </div>
     </div>
 
-    <div class="hidden print-only p-8">
-        <h1 class="text-3xl font-bold mb-2 uppercase text-center">Laporan Pesanan Merch</h1>
-        <hr class="border-2 border-slate-800 mb-8">
+    <div class="hidden print-only p-8 max-w-4xl mx-auto">
+        <h1>Laporan Pesanan Merchandise</h1>
+        <p id="print-tanggal" class="text-sm text-gray-500 text-center mb-8"></p>
         
-        <h2 class="text-xl font-bold mb-4">Ringkasan Eksekutif</h2>
-        <table class="w-1/2 mb-8">
-            <tr><td class="font-bold w-1/2">Total Pendapatan</td><td id="print-pendapatan">Rp 0</td></tr>
-            <tr><td class="font-bold">Total Item Terjual</td><td id="print-item-bayar">0</td></tr>
-            <tr><td class="pl-4 border-none pt-0 pb-0">- Baju Terjual</td><td class="border-none pt-0 pb-0" id="print-baju-bayar">0</td></tr>
-            <tr><td class="pl-4 border-none pt-0 pb-0">- Topi Terjual</td><td class="border-none pt-0 pb-0" id="print-topi-bayar">0</td></tr>
-            <tr><td class="pl-4 border-none pt-0 pb-2">- Tumbler Terjual</td><td class="border-none pt-0 pb-2" id="print-tumbler-bayar">0</td></tr>
-            <tr><td class="font-bold border-t">Total Item Free Gift</td><td class="border-t" id="print-item-free">0</td></tr>
-            <tr><td class="pl-4 border-none pt-0 pb-0">- Baju Free Gift</td><td class="border-none pt-0 pb-0" id="print-baju-free">0</td></tr>
-            <tr><td class="pl-4 border-none pt-0 pb-0">- Topi Free Gift</td><td class="border-none pt-0 pb-0" id="print-topi-free">0</td></tr>
-            <tr><td class="pl-4 border-none pt-0 pb-2">- Tumbler Free Gift</td><td class="border-none pt-0 pb-2" id="print-tumbler-free">0</td></tr>
-            <tr><td class="font-bold border-t">Total Pembeli</td><td class="border-t" id="print-pembeli">0</td></tr>
+        <h2>Ringkasan Eksekutif</h2>
+        <div class="print-grid">
+            <div class="print-summary-box">
+                <div class="print-summary-title">Total Pendapatan</div>
+                <div class="print-summary-value" id="print-pendapatan">Rp 0</div>
+            </div>
+            <div class="print-summary-box">
+                <div class="print-summary-title">Total Partisipan</div>
+                <div class="print-summary-value"><span id="print-pembeli">0</span> Pembeli / <span id="print-sponsor-count">0</span> Sponsor</div>
+            </div>
+        </div>
+
+        <table class="w-full mb-8 text-sm">
+            <tr>
+                <th class="w-1/2">Item Berbayar Terjual</th>
+                <th>Item Free Gift Terdistribusi</th>
+            </tr>
+            <tr>
+                <td>
+                    Baju: <b id="print-baju-bayar">0</b><br>
+                    Topi: <b id="print-topi-bayar">0</b><br>
+                    Tumbler: <b id="print-tumbler-bayar">0</b>
+                </td>
+                <td>
+                    Baju: <b id="print-baju-free">0</b><br>
+                    Topi: <b id="print-topi-free">0</b><br>
+                    Tumbler: <b id="print-tumbler-free">0</b>
+                </td>
+            </tr>
         </table>
 
-        <h2 class="text-xl font-bold mb-4">Data Transaksi Pembeli</h2>
-        <div id="print-tabel-pembeli" class="mb-8"></div>
+        <h2>Detail Transaksi Pembeli</h2>
+        <div id="print-tabel-pembeli" class="mb-8 text-sm"></div>
 
         <div class="print-break"></div>
 
-        <h2 class="text-xl font-bold mb-4">Data Distribusi Free Gift</h2>
-        <div id="print-tabel-freegift" class="mb-8"></div>
+        <h2>Detail Distribusi Free Gift</h2>
+        <div id="print-tabel-freegift" class="mb-8 text-sm"></div>
 
-        <h2 class="text-xl font-bold mb-4">Data Sponsorship</h2>
-        <div id="print-tabel-sponsor"></div>
+        <h2>Data Sponsorship</h2>
+        <div id="print-tabel-sponsor" class="text-sm"></div>
     </div>
 
     <script>
@@ -550,41 +579,107 @@
 
             const formatRupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalPendapatan);
 
-            document.getElementById('stat-pendapatan').innerText = formatRupiah;
-            
-            document.getElementById('stat-item-bayar').innerText = totalItemBayar;
-            document.getElementById('stat-baju-bayar').innerText = totalBajuBayar;
-            document.getElementById('stat-topi-bayar').innerText = totalTopiBayar;
-            document.getElementById('stat-tumbler-bayar').innerText = totalTumblerBayar;
-            
-            document.getElementById('stat-item-free').innerText = totalItemFree;
-            document.getElementById('stat-baju-free').innerText = totalBajuFree;
-            document.getElementById('stat-topi-free').innerText = totalTopiFree;
-            document.getElementById('stat-tumbler-free').innerText = totalTumblerFree;
-            
-            document.getElementById('stat-pembeli').innerText = totalPembeli;
-            document.getElementById('stat-penerima-free').innerText = totalPenerimaFree;
-            document.getElementById('stat-sponsor').innerText = totalSponsor;
+            // Fungsi helper agar tidak terjadi error jika elemen ID belum dirender atau dihapus
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = val;
+            };
 
-            document.getElementById('print-pendapatan').innerText = formatRupiah;
+            setVal('stat-pendapatan', formatRupiah);
             
-            document.getElementById('print-item-bayar').innerText = totalItemBayar;
-            document.getElementById('print-baju-bayar').innerText = totalBajuBayar;
-            document.getElementById('print-topi-bayar').innerText = totalTopiBayar;
-            document.getElementById('print-tumbler-bayar').innerText = totalTumblerBayar;
+            setVal('stat-item-bayar', totalItemBayar);
+            setVal('stat-baju-bayar', totalBajuBayar);
+            setVal('stat-topi-bayar', totalTopiBayar);
+            setVal('stat-tumbler-bayar', totalTumblerBayar);
             
-            document.getElementById('print-item-free').innerText = totalItemFree;
-            document.getElementById('print-baju-free').innerText = totalBajuFree;
-            document.getElementById('print-topi-free').innerText = totalTopiFree;
-            document.getElementById('print-tumbler-free').innerText = totalTumblerFree;
+            setVal('stat-item-free', totalItemFree);
+            setVal('stat-baju-free', totalBajuFree);
+            setVal('stat-topi-free', totalTopiFree);
+            setVal('stat-tumbler-free', totalTumblerFree);
             
-            document.getElementById('print-pembeli').innerText = totalPembeli;
+            setVal('stat-pembeli', totalPembeli);
+            setVal('stat-penerima-free', totalPenerimaFree);
+            setVal('stat-sponsor', totalSponsor);
+
+            setVal('print-pendapatan', formatRupiah);
+            
+            // Variabel dibawah aman karena di handle oleh fungsi helper setVal
+            setVal('print-item-bayar', totalItemBayar);
+            setVal('print-baju-bayar', totalBajuBayar);
+            setVal('print-topi-bayar', totalTopiBayar);
+            setVal('print-tumbler-bayar', totalTumblerBayar);
+            
+            setVal('print-item-free', totalItemFree);
+            setVal('print-baju-free', totalBajuFree);
+            setVal('print-topi-free', totalTopiFree);
+            setVal('print-tumbler-free', totalTumblerFree);
+            
+            setVal('print-pembeli', totalPembeli);
         }
 
         window.onbeforeprint = function() {
-            document.getElementById('print-tabel-pembeli').innerHTML = document.getElementById('tabel-pembeli').outerHTML;
-            document.getElementById('print-tabel-freegift').innerHTML = document.getElementById('tabel-freegift').outerHTML;
-            document.getElementById('print-tabel-sponsor').innerHTML = document.getElementById('tabel-sponsor').outerHTML;
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('print-tanggal').innerText = 'Dicetak pada: ' + new Date().toLocaleDateString('id-ID', options);
+
+            const getVal = (td) => {
+                if (!td) return '-';
+                const select = td.querySelector('select');
+                if (select) {
+                    return select.options[select.selectedIndex].text.replace(/\s\(\+[0-9]+rb\)/g, '');
+                }
+                return td.innerText.trim() || '-';
+            };
+
+            let htmlPembeli = '<table><thead><tr><th>Nama</th><th class="text-center">Baju</th><th class="text-center">Topi</th><th class="text-center">Tumbler</th><th>Ukuran</th><th>Warna</th><th class="text-right">Total (Rp)</th><th class="text-center">Status</th></tr></thead><tbody>';
+            document.querySelectorAll('#tabel-pembeli tbody tr').forEach(tr => {
+                const tds = tr.querySelectorAll('td');
+                if(tds.length < 11) return;
+                htmlPembeli += `<tr>
+                    <td>${getVal(tds[1])}</td>
+                    <td class="text-center">${getVal(tds[3])}</td>
+                    <td class="text-center">${getVal(tds[4])}</td>
+                    <td class="text-center">${getVal(tds[5])}</td>
+                    <td>${getVal(tds[6])}</td>
+                    <td>${getVal(tds[7])}</td>
+                    <td class="text-right font-bold">${getVal(tds[8])}</td>
+                    <td class="text-center font-bold">${getVal(tds[10])}</td>
+                </tr>`;
+            });
+            htmlPembeli += '</tbody></table>';
+            document.getElementById('print-tabel-pembeli').innerHTML = htmlPembeli;
+
+            let htmlFree = '<table><thead><tr><th>Penerima</th><th>Kategori</th><th class="text-center">Baju</th><th class="text-center">Topi</th><th class="text-center">Tumbler</th><th>Ukuran</th><th>Warna</th></tr></thead><tbody>';
+            document.querySelectorAll('#tabel-freegift tbody tr').forEach(tr => {
+                const tds = tr.querySelectorAll('td');
+                if(tds.length < 9) return;
+                htmlFree += `<tr>
+                    <td>${getVal(tds[1])}</td>
+                    <td>${getVal(tds[2])}</td>
+                    <td class="text-center">${getVal(tds[3])}</td>
+                    <td class="text-center">${getVal(tds[4])}</td>
+                    <td class="text-center">${getVal(tds[5])}</td>
+                    <td>${getVal(tds[6])}</td>
+                    <td>${getVal(tds[7])}</td>
+                </tr>`;
+            });
+            htmlFree += '</tbody></table>';
+            document.getElementById('print-tabel-freegift').innerHTML = htmlFree;
+
+            let htmlSponsor = '<table><thead><tr><th>Sponsor</th><th class="text-right">Nilai/Jumlah</th><th>Jenis Bantuan</th></tr></thead><tbody>';
+            let totalSponsor = 0;
+            document.querySelectorAll('#tabel-sponsor tbody tr').forEach(tr => {
+                const tds = tr.querySelectorAll('td');
+                if(tds.length < 4) return;
+                if(tr.innerText.trim().length > 5) totalSponsor++;
+                htmlSponsor += `<tr>
+                    <td>${getVal(tds[0])}</td>
+                    <td class="text-right">${getVal(tds[1])}</td>
+                    <td>${getVal(tds[2])}</td>
+                </tr>`;
+            });
+            htmlSponsor += '</tbody></table>';
+            document.getElementById('print-tabel-sponsor').innerHTML = htmlSponsor;
+            document.getElementById('print-sponsor-count').innerText = totalSponsor;
         };
 
         function importCSV(event, tipe) {
