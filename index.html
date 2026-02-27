@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Manajemen Pesanan Merch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        [contenteditable="true"]:hover { background-color: #e5e7eb; cursor: text; outline: 1px dashed #9ca3af; }
+        [contenteditable="true"]:focus { background-color: #ffffff; outline: 2px solid #3b82f6; }
+        th, td { white-space: nowrap; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @media print {
+            body { background-color: #ffffff; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            .tab-content { display: block !important; }
+            #katalog-section, #impor-section { display: none !important; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th, td { border: 1px solid #000; padding: 8px; text-align: left; white-space: normal; }
+            h1, h2 { color: #000; }
+            .shadow-lg { box-shadow: none !important; }
+            .rounded-lg { border-radius: 0 !important; }
+            .print-break { page-break-before: always; }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="flex flex-col md:flex-row h-screen overflow-hidden no-print">
+        
+        <div class="w-full md:w-64 bg-slate-800 text-white flex flex-col flex-shrink-0 shadow-lg z-10">
+            <div class="p-4 md:p-6 text-center border-b border-slate-700">
+                <h1 class="text-lg md:text-xl font-bold uppercase tracking-wider">Panel Admin</h1>
+                <p class="text-xs text-slate-400 mt-1 hidden md:block">Manajemen Pesanan Merch</p>
+            </div>
+            <nav class="flex overflow-x-auto md:flex-col md:flex-1 p-2 md:p-4 space-x-2 md:space-x-0 md:space-y-2 hide-scrollbar">
+                <button onclick="switchTab('dasbor')" class="whitespace-nowrap flex-1 text-center md:text-left px-4 py-2 md:py-3 rounded bg-slate-700 hover:bg-slate-600 transition font-medium text-sm md:text-base" id="btn-dasbor">Dasbor</button>
+                <button onclick="switchTab('pembeli')" class="whitespace-nowrap flex-1 text-center md:text-left px-4 py-2 md:py-3 rounded hover:bg-slate-600 transition font-medium text-sm md:text-base" id="btn-pembeli">Data Pembeli</button>
+                <button onclick="switchTab('freegift')" class="whitespace-nowrap flex-1 text-center md:text-left px-4 py-2 md:py-3 rounded hover:bg-slate-600 transition font-medium text-sm md:text-base" id="btn-freegift">Data Free Gift</button>
+                <button onclick="switchTab('sponsor')" class="whitespace-nowrap flex-1 text-center md:text-left px-4 py-2 md:py-3 rounded hover:bg-slate-600 transition font-medium text-sm md:text-base" id="btn-sponsor">Data Sponsor</button>
+                <button onclick="switchTab('katalog')" class="whitespace-nowrap flex-1 text-center md:text-left px-4 py-2 md:py-3 rounded hover:bg-slate-600 transition font-medium text-sm md:text-base" id="btn-katalog">Katalog</button>
+            </nav>
+            <div class="hidden md:block p-4 border-t border-slate-700">
+                <button onclick="window.print()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition">
+                    Cetak Laporan PDF
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 relative">
+            
+            <div id="dasbor" class="tab-content active max-w-6xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Ringkasan Pesanan</h2>
+                    <button onclick="window.print()" class="md:hidden bg-blue-600 text-white font-bold py-2 px-4 rounded text-sm">
+                        Cetak PDF
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
+                    <div class="bg-white p-4 md:p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+                        <p class="text-xs md:text-sm text-gray-500 uppercase font-bold">Total Pendapatan</p>
+                        <p class="text-2xl md:text-3xl font-bold text-slate-800 mt-2" id="stat-pendapatan">Rp 0</p>
+                    </div>
+                    <div class="bg-white p-4 md:p-6 rounded-lg shadow-md border-l-4 border-green-500">
+                        <p class="text-xs md:text-sm text-gray-500 uppercase font-bold">Item Terjual (Berbayar)</p>
+                        <p class="text-2xl md:text-3xl font-bold text-slate-800 mt-2" id="stat-item-bayar">0</p>
+                    </div>
+                    <div class="bg-white p-4 md:p-6 rounded-lg shadow-md border-l-4 border-orange-500">
+                        <p class="text-xs md:text-sm text-gray-500 uppercase font-bold">Item Free Gift</p>
+                        <p class="text-2xl md:text-3xl font-bold text-slate-800 mt-2" id="stat-item-free">0</p>
+                    </div>
+                    <div class="bg-white p-4 md:p-6 rounded-lg shadow-md border-l-4 border-purple-500">
+                        <p class="text-xs md:text-sm text-gray-500 uppercase font-bold">Total Pembeli</p>
+                        <p class="text-2xl md:text-3xl font-bold text-slate-800 mt-2" id="stat-pembeli">0</p>
+                    </div>
+                    <div class="bg-white p-4 md:p-6 rounded-lg shadow-md border-l-4 border-red-500">
+                        <p class="text-xs md:text-sm text-gray-500 uppercase font-bold">Penerima Free Gift</p>
+                        <p class="text-2xl md:text-3xl font-bold text-slate-800 mt-2" id="stat-penerima-free">0</p>
+                    </div>
+                    <div class="bg-white p-4 md:p-6 rounded-lg shadow-md border-l-4 border-indigo-500">
+                        <p class="text-xs md:text-sm text-gray-500 uppercase font-bold">Total Sponsor</p>
+                        <p class="text-2xl md:text-3xl font-bold text-slate-800 mt-2" id="stat-sponsor">0</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+                    <h3 class="text-lg md:text-xl font-bold mb-4 border-b pb-2">Instruksi Penggunaan</h3>
+                    <ul class="list-disc pl-5 space-y-2 text-sm md:text-base text-gray-700">
+                        <li>Navigasi melalui menu di atas atau di kiri untuk berpindah halaman.</li>
+                        <li>Klik langsung pada teks di dalam tabel untuk mengedit data seperti di Excel.</li>
+                        <li>Kolom Status Bayar di ujung kanan Data Pembeli bisa Anda isi dengan Lunas atau Belum.</li>
+                        <li>Catat VIP, dosen, panelis, dan sponsor yang mendapat barang gratis pada tab Data Free Gift.</li>
+                        <li>Gunakan fitur Cetak PDF untuk menyimpan laporan yang rapi secara otomatis.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="pembeli" class="tab-content max-w-6xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Tabel Data Pembeli</h2>
+                    <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                        <input type="file" id="file-pembeli" accept=".csv" class="hidden" onchange="importCSV(event, 'pembeli')">
+                        <button onclick="document.getElementById('file-pembeli').click()" class="flex-1 md:flex-none bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-4 rounded shadow hover:bg-gray-50 text-sm">
+                            Impor CSV
+                        </button>
+                        <button onclick="tambahBaris('tabel-pembeli')" class="flex-1 md:flex-none bg-green-600 text-white font-semibold py-2 px-4 rounded shadow hover:bg-green-700 text-sm">
+                            + Tambah Baris
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md overflow-x-auto w-full">
+                    <table class="w-full text-left border-collapse" id="tabel-pembeli">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 uppercase text-xs md:text-sm leading-normal border-b">
+                                <th class="py-3 px-4">No</th>
+                                <th class="py-3 px-4">Nama</th>
+                                <th class="py-3 px-4">Angkatan</th>
+                                <th class="py-3 px-4">Baju</th>
+                                <th class="py-3 px-4">Topi</th>
+                                <th class="py-3 px-4">Tumbler</th>
+                                <th class="py-3 px-4">Ukuran</th>
+                                <th class="py-3 px-4">Warna</th>
+                                <th class="py-3 px-4">Total (Rp)</th>
+                                <th class="py-3 px-4">No HP</th>
+                                <th class="py-3 px-4 text-center">Status Bayar</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xs md:text-sm text-gray-700" onkeyup="hitungSemuaTotalBaris(); kalkulasiDasbor()">
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-3 px-4" contenteditable="true">1</td>
+                                <td class="py-3 px-4" contenteditable="true">Fuji Kurniansyah</td>
+                                <td class="py-3 px-4" contenteditable="true">2017</td>
+                                <td class="py-3 px-4 item-count" contenteditable="true">2</td>
+                                <td class="py-3 px-4 item-count" contenteditable="true">0</td>
+                                <td class="py-3 px-4 item-count" contenteditable="true">0</td>
+                                <td class="py-3 px-4">
+                                    <select class="ukuran-baju border border-gray-300 rounded p-1" onchange="hitungSemuaTotalBaris(); kalkulasiDasbor()">
+                                        <option value="0">S/M/L/XL</option>
+                                        <option value="10000">XXL (+10rb)</option>
+                                        <option value="15000">XXXL (+15rb)</option>
+                                    </select>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <select class="border border-gray-300 rounded p-1">
+                                        <option value="Light Brown">Light Brown</option>
+                                        <option value="Orange Bata">Orange Bata</option>
+                                        <option value="Putih">Putih</option>
+                                        <option value="Hitam">Hitam</option>
+                                        <option value="Beige">Beige</option>
+                                        <option value="Cream">Cream</option>
+                                    </select>
+                                </td>
+                                <td class="py-3 px-4 item-total font-bold" contenteditable="true">220000</td>
+                                <td class="py-3 px-4" contenteditable="true">+62 813-7221-6326</td>
+                                <td class="py-3 px-4 font-bold text-green-600 text-center" contenteditable="true">Lunas</td>
+                            </tr>
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-3 px-4" contenteditable="true">2</td>
+                                <td class="py-3 px-4" contenteditable="true">fendri amir</td>
+                                <td class="py-3 px-4" contenteditable="true">2003</td>
+                                <td class="py-3 px-4 item-count" contenteditable="true">2</td>
+                                <td class="py-3 px-4 item-count" contenteditable="true">2</td>
+                                <td class="py-3 px-4 item-count" contenteditable="true">0</td>
+                                <td class="py-3 px-4">
+                                    <select class="ukuran-baju border border-gray-300 rounded p-1" onchange="hitungSemuaTotalBaris(); kalkulasiDasbor()">
+                                        <option value="0">S/M/L/XL</option>
+                                        <option value="10000">XXL (+10rb)</option>
+                                        <option value="15000">XXXL (+15rb)</option>
+                                    </select>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <select class="border border-gray-300 rounded p-1">
+                                        <option value="Light Brown">Light Brown</option>
+                                        <option value="Orange Bata">Orange Bata</option>
+                                        <option value="Putih">Putih</option>
+                                        <option value="Hitam">Hitam</option>
+                                        <option value="Beige">Beige</option>
+                                        <option value="Cream">Cream</option>
+                                    </select>
+                                </td>
+                                <td class="py-3 px-4 item-total font-bold" contenteditable="true">340000</td>
+                                <td class="py-3 px-4" contenteditable="true">+62 857-6070-5898</td>
+                                <td class="py-3 px-4 font-bold text-red-500 text-center" contenteditable="true">Belum</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="freegift" class="tab-content max-w-6xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Tabel Data Free Gift</h2>
+                    <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                        <button onclick="tambahBaris('tabel-freegift')" class="flex-1 md:flex-none bg-green-600 text-white font-semibold py-2 px-4 rounded shadow hover:bg-green-700 text-sm">
+                            + Tambah Baris
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-x-auto w-full">
+                    <table class="w-full text-left border-collapse" id="tabel-freegift">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 uppercase text-xs md:text-sm leading-normal border-b">
+                                <th class="py-3 px-4">No</th>
+                                <th class="py-3 px-4">Penerima</th>
+                                <th class="py-3 px-4">Kategori</th>
+                                <th class="py-3 px-4">Baju</th>
+                                <th class="py-3 px-4">Topi</th>
+                                <th class="py-3 px-4">Tumbler</th>
+                                <th class="py-3 px-4">Ukuran</th>
+                                <th class="py-3 px-4">Warna</th>
+                                <th class="py-3 px-4">Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xs md:text-sm text-gray-700" onkeyup="kalkulasiDasbor()">
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-3 px-4" contenteditable="true">1</td>
+                                <td class="py-3 px-4" contenteditable="true">Bapak Rektor</td>
+                                <td class="py-3 px-4" contenteditable="true">VIP</td>
+                                <td class="py-3 px-4 free-count" contenteditable="true">1</td>
+                                <td class="py-3 px-4 free-count" contenteditable="true">1</td>
+                                <td class="py-3 px-4 free-count" contenteditable="true">1</td>
+                                <td class="py-3 px-4">
+                                    <select class="border border-gray-300 rounded p-1">
+                                        <option value="0">S/M/L/XL</option>
+                                        <option value="10000">XXL</option>
+                                        <option value="15000">XXXL</option>
+                                    </select>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <select class="border border-gray-300 rounded p-1">
+                                        <option value="Light Brown">Light Brown</option>
+                                        <option value="Orange Bata">Orange Bata</option>
+                                        <option value="Putih">Putih</option>
+                                        <option value="Hitam">Hitam</option>
+                                        <option value="Beige">Beige</option>
+                                        <option value="Cream">Cream</option>
+                                    </select>
+                                </td>
+                                <td class="py-3 px-4" contenteditable="true">Paket Lengkap</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="sponsor" class="tab-content max-w-6xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Tabel Data Sponsor</h2>
+                    <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                        <input type="file" id="file-sponsor" accept=".csv" class="hidden" onchange="importCSV(event, 'sponsor')">
+                        <button onclick="document.getElementById('file-sponsor').click()" class="flex-1 md:flex-none bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-4 rounded shadow hover:bg-gray-50 text-sm">
+                            Impor CSV
+                        </button>
+                        <button onclick="tambahBaris('tabel-sponsor')" class="flex-1 md:flex-none bg-green-600 text-white font-semibold py-2 px-4 rounded shadow hover:bg-green-700 text-sm">
+                            + Tambah Baris
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-x-auto w-full">
+                    <table class="w-full text-left border-collapse" id="tabel-sponsor">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 uppercase text-xs md:text-sm leading-normal border-b">
+                                <th class="py-3 px-4">Keterangan</th>
+                                <th class="py-3 px-4">Jumlah Dana/Barang</th>
+                                <th class="py-3 px-4">Jenis Bantuan</th>
+                                <th class="py-3 px-4">Detail Kesepakatan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xs md:text-sm text-gray-700" onkeyup="kalkulasiDasbor()">
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-3 px-4" contenteditable="true">Sponsor 1</td>
+                                <td class="py-3 px-4 sponsor-count" contenteditable="true">Rp 5.000.000</td>
+                                <td class="py-3 px-4" contenteditable="true">Uang Tunai</td>
+                                <td class="py-3 px-4" contenteditable="true">Logo di Spanduk</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="katalog" class="tab-content max-w-6xl mx-auto">
+                <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-slate-800">Katalog Desain Merch</h2>
+                <p class="mb-6 text-gray-600 text-sm md:text-lg">Berikut pratinjau desain yang dimuat langsung dari Google Drive.</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
+                    <div class="bg-white p-3 md:p-4 rounded-lg shadow-md border">
+                        <img src="https://drive.google.com/uc?export=view&id=1ntBlKGhbQAA3NwTUZnuzyg6Vhom1rgrE" alt="Desain 1" class="w-full h-64 md:h-80 object-cover rounded" onerror="this.onerror=null; this.src='https://via.placeholder.com/600x400?text=Akses+Ditolak+Atau+Gambar+Dihapus';">
+                        <p class="text-center mt-3 font-semibold text-gray-700">Desain 1</p>
+                    </div>
+                    <div class="bg-white p-3 md:p-4 rounded-lg shadow-md border">
+                        <img src="https://drive.google.com/uc?export=view&id=1SirvP6xVrxyVxtTME-6QNlrW3PAEf9pA" alt="Desain 2" class="w-full h-64 md:h-80 object-cover rounded" onerror="this.onerror=null; this.src='https://via.placeholder.com/600x400?text=Akses+Ditolak+Atau+Gambar+Dihapus';">
+                        <p class="text-center mt-3 font-semibold text-gray-700">Desain 2</p>
+                    </div>
+                    <div class="bg-white p-3 md:p-4 rounded-lg shadow-md border">
+                        <img src="https://drive.google.com/uc?export=view&id=1z1fzS3JlMkJczS51yZZZq8M9viJjTvVO" alt="Desain 3" class="w-full h-64 md:h-80 object-cover rounded" onerror="this.onerror=null; this.src='https://via.placeholder.com/600x400?text=Akses+Ditolak+Atau+Gambar+Dihapus';">
+                        <p class="text-center mt-3 font-semibold text-gray-700">Desain 3</p>
+                    </div>
+                    <div class="bg-white p-3 md:p-4 rounded-lg shadow-md border">
+                        <img src="https://drive.google.com/uc?export=view&id=1-Yyq0xuRS-o7ykD3yqOg4HnHUrOrfhLT" alt="Desain 4" class="w-full h-64 md:h-80 object-cover rounded" onerror="this.onerror=null; this.src='https://via.placeholder.com/600x400?text=Akses+Ditolak+Atau+Gambar+Dihapus';">
+                        <p class="text-center mt-3 font-semibold text-gray-700">Materi Promosi</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="hidden print-only p-8">
+        <h1 class="text-3xl font-bold mb-2 uppercase text-center">Laporan Pesanan Merch</h1>
+        <hr class="border-2 border-slate-800 mb-8">
+        
+        <h2 class="text-xl font-bold mb-4">Ringkasan Eksekutif</h2>
+        <table class="w-1/2 mb-8">
+            <tr><td class="font-bold w-1/2">Total Pendapatan</td><td id="print-pendapatan">Rp 0</td></tr>
+            <tr><td class="font-bold">Total Item Terjual</td><td id="print-item-bayar">0</td></tr>
+            <tr><td class="font-bold">Total Item Free Gift</td><td id="print-item-free">0</td></tr>
+            <tr><td class="font-bold">Total Pembeli</td><td id="print-pembeli">0</td></tr>
+        </table>
+
+        <h2 class="text-xl font-bold mb-4">Data Transaksi Pembeli</h2>
+        <div id="print-tabel-pembeli" class="mb-8"></div>
+
+        <div class="print-break"></div>
+
+        <h2 class="text-xl font-bold mb-4">Data Distribusi Free Gift</h2>
+        <div id="print-tabel-freegift" class="mb-8"></div>
+
+        <h2 class="text-xl font-bold mb-4">Data Sponsorship</h2>
+        <div id="print-tabel-sponsor"></div>
+    </div>
+
+    <script>
+        function hitungSemuaTotalBaris() {
+            const barisPembeli = document.querySelectorAll('#tabel-pembeli tbody tr');
+            barisPembeli.forEach(tr => {
+                const counts = tr.querySelectorAll('.item-count');
+                if (counts.length >= 3) {
+                    const qtyBaju = parseInt(counts[0].innerText) || 0;
+                    const qtyTopi = parseInt(counts[1].innerText) || 0;
+                    const qtyTumbler = parseInt(counts[2].innerText) || 0;
+                    
+                    const selectUkuran = tr.querySelector('.ukuran-baju');
+                    const extraBiaya = selectUkuran ? parseInt(selectUkuran.value) || 0 : 0;
+                    
+                    const total = (qtyBaju * 110000) + (qtyBaju * extraBiaya) + (qtyTopi * 60000) + (qtyTumbler * 90000);
+                    
+                    const totalCell = tr.querySelector('.item-total');
+                    if (totalCell && total > 0) {
+                        totalCell.innerText = total;
+                    }
+                }
+            });
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-slate-700');
+            });
+            document.getElementById('btn-' + tabId).classList.add('bg-slate-700');
+        }
+
+        function tambahBaris(tabelId) {
+            const tbody = document.querySelector(`#${tabelId} tbody`);
+            const tr = document.createElement('tr');
+            tr.className = "border-b hover:bg-gray-50";
+            
+            let columns = 4;
+            if (tabelId === 'tabel-pembeli') columns = 11;
+            if (tabelId === 'tabel-freegift') columns = 9;
+
+            let html = '';
+            for(let i=0; i<columns; i++) {
+                let kelas = "py-3 px-4";
+                
+                if (tabelId === 'tabel-pembeli') {
+                    if(i >= 3 && i <= 5) kelas += " item-count";
+                    if(i === 8) kelas += " item-total font-bold";
+                    if(i === 10) kelas += " text-center";
+
+                    if(i === 6) {
+                        html += `<td class="${kelas}">
+                            <select class="ukuran-baju border border-gray-300 rounded p-1" onchange="hitungSemuaTotalBaris(); kalkulasiDasbor()">
+                                <option value="0">S/M/L/XL</option>
+                                <option value="10000">XXL (+10rb)</option>
+                                <option value="15000">XXXL (+15rb)</option>
+                            </select>
+                        </td>`;
+                        continue;
+                    }
+                    if(i === 7) {
+                        html += `<td class="${kelas}">
+                            <select class="border border-gray-300 rounded p-1">
+                                <option value="Light Brown">Light Brown</option>
+                                <option value="Orange Bata">Orange Bata</option>
+                                <option value="Putih">Putih</option>
+                                <option value="Hitam">Hitam</option>
+                                <option value="Beige">Beige</option>
+                                <option value="Cream">Cream</option>
+                            </select>
+                        </td>`;
+                        continue;
+                    }
+                } else if (tabelId === 'tabel-freegift') {
+                    if(i >= 3 && i <= 5) kelas += " free-count";
+
+                    if(i === 6) {
+                        html += `<td class="${kelas}">
+                            <select class="border border-gray-300 rounded p-1">
+                                <option value="0">S/M/L/XL</option>
+                                <option value="10000">XXL</option>
+                                <option value="15000">XXXL</option>
+                            </select>
+                        </td>`;
+                        continue;
+                    }
+                    if(i === 7) {
+                        html += `<td class="${kelas}">
+                            <select class="border border-gray-300 rounded p-1">
+                                <option value="Light Brown">Light Brown</option>
+                                <option value="Orange Bata">Orange Bata</option>
+                                <option value="Putih">Putih</option>
+                                <option value="Hitam">Hitam</option>
+                                <option value="Beige">Beige</option>
+                                <option value="Cream">Cream</option>
+                            </select>
+                        </td>`;
+                        continue;
+                    }
+                }
+
+                html += `<td class="${kelas}" contenteditable="true">-</td>`;
+            }
+            tr.innerHTML = html;
+            tbody.appendChild(tr);
+        }
+
+        function kalkulasiDasbor() {
+            let totalPendapatan = 0;
+            let totalItemBayar = 0;
+            let totalItemFree = 0;
+            let totalPembeli = 0;
+            let totalSponsor = 0;
+            let totalPenerimaFree = 0;
+
+            const barisPembeli = document.querySelectorAll('#tabel-pembeli tbody tr');
+            barisPembeli.forEach(tr => {
+                let isEmpty = true;
+                const totalCell = tr.querySelector('.item-total');
+                if(totalCell) {
+                    const val = parseInt(totalCell.innerText.replace(/\D/g, ''));
+                    if(!isNaN(val)) { totalPendapatan += val; isEmpty = false; }
+                }
+
+                const counts = tr.querySelectorAll('.item-count');
+                counts.forEach(c => {
+                    const val = parseInt(c.innerText);
+                    if(!isNaN(val)) { totalItemBayar += val; isEmpty = false; }
+                });
+
+                if(!isEmpty) totalPembeli++;
+            });
+
+            const barisFree = document.querySelectorAll('#tabel-freegift tbody tr');
+            barisFree.forEach(tr => {
+                let isEmpty = true;
+                const counts = tr.querySelectorAll('.free-count');
+                counts.forEach(c => {
+                    const val = parseInt(c.innerText);
+                    if(!isNaN(val)) { totalItemFree += val; isEmpty = false; }
+                });
+                if(!isEmpty) totalPenerimaFree++;
+            });
+
+            const barisSponsor = document.querySelectorAll('#tabel-sponsor tbody tr');
+            barisSponsor.forEach(tr => {
+                if(tr.innerText.trim().length > 5) totalSponsor++;
+            });
+
+            const formatRupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalPendapatan);
+
+            document.getElementById('stat-pendapatan').innerText = formatRupiah;
+            document.getElementById('stat-item-bayar').innerText = totalItemBayar;
+            document.getElementById('stat-item-free').innerText = totalItemFree;
+            document.getElementById('stat-pembeli').innerText = totalPembeli;
+            document.getElementById('stat-penerima-free').innerText = totalPenerimaFree;
+            document.getElementById('stat-sponsor').innerText = totalSponsor;
+
+            document.getElementById('print-pendapatan').innerText = formatRupiah;
+            document.getElementById('print-item-bayar').innerText = totalItemBayar;
+            document.getElementById('print-item-free').innerText = totalItemFree;
+            document.getElementById('print-pembeli').innerText = totalPembeli;
+        }
+
+        window.onbeforeprint = function() {
+            document.getElementById('print-tabel-pembeli').innerHTML = document.getElementById('tabel-pembeli').outerHTML;
+            document.getElementById('print-tabel-freegift').innerHTML = document.getElementById('tabel-freegift').outerHTML;
+            document.getElementById('print-tabel-sponsor').innerHTML = document.getElementById('tabel-sponsor').outerHTML;
+        };
+
+        function importCSV(event, tipe) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split('\n');
+                let tbody = document.querySelector(`#tabel-${tipe} tbody`);
+                tbody.innerHTML = ''; 
+
+                let isDataArea = false;
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    
+                    const cols = line.split(',');
+
+                    if(tipe === 'pembeli' && line.includes('No,Nama,Angkatan')) { isDataArea = true; continue; }
+                    if(tipe === 'pembeli' && isDataArea && line.includes(',,,Baju,Topi')) { continue; } 
+                    
+                    if(tipe === 'sponsor' && line.includes('Keterangan,Jumlah')) { isDataArea = true; continue; }
+
+                    if (isDataArea) {
+                        let cleanCols = cols.filter(c => c.trim() !== '' && c !== '\r');
+                        if(cleanCols.length < 2) continue;
+
+                        const tr = document.createElement('tr');
+                        tr.className = "border-b hover:bg-gray-50";
+                        
+                        if(tipe === 'pembeli') {
+                            let html = `
+                                <td class="py-3 px-4" contenteditable="true">${cols[0] || '-'}</td>
+                                <td class="py-3 px-4" contenteditable="true">${cols[1] || '-'}</td>
+                                <td class="py-3 px-4" contenteditable="true">${cols[2] || '-'}</td>
+                                <td class="py-3 px-4 item-count" contenteditable="true">${cols[3] || '0'}</td>
+                                <td class="py-3 px-4 item-count" contenteditable="true">${cols[4] || '0'}</td>
+                                <td class="py-3 px-4 item-count" contenteditable="true">${cols[5] || '0'}</td>
+                                <td class="py-3 px-4">
+                                    <select class="ukuran-baju border border-gray-300 rounded p-1" onchange="hitungSemuaTotalBaris(); kalkulasiDasbor()">
+                                        <option value="0">S/M/L/XL</option>
+                                        <option value="10000">XXL (+10rb)</option>
+                                        <option value="15000">XXXL (+15rb)</option>
+                                    </select>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <select class="border border-gray-300 rounded p-1">
+                                        <option value="Light Brown">Light Brown</option>
+                                        <option value="Orange Bata">Orange Bata</option>
+                                        <option value="Putih">Putih</option>
+                                        <option value="Hitam">Hitam</option>
+                                        <option value="Beige">Beige</option>
+                                        <option value="Cream">Cream</option>
+                                    </select>
+                                </td>
+                                <td class="py-3 px-4 item-total font-bold" contenteditable="true">${cols[12] || '0'}</td>
+                                <td class="py-3 px-4" contenteditable="true">${cols[13] || '-'}</td>
+                                <td class="py-3 px-4 text-center" contenteditable="true">-</td>
+                            `;
+                            tr.innerHTML = html;
+                        } else {
+                            let html = `
+                                <td class="py-3 px-4" contenteditable="true">${cols[0] || '-'}</td>
+                                <td class="py-3 px-4 sponsor-count" contenteditable="true">${cols[1] || '0'}</td>
+                                <td class="py-3 px-4" contenteditable="true">${cols[2] || '-'}</td>
+                                <td class="py-3 px-4" contenteditable="true">${cols[3] || '-'}</td>
+                            `;
+                            tr.innerHTML = html;
+                        }
+                        tbody.appendChild(tr);
+                    }
+                }
+                kalkulasiDasbor();
+                alert(`Data ${tipe} berhasil dimuat. Silakan periksa tabel dan sesuaikan kembali jika ada pergeseran kolom.`);
+            };
+            reader.readAsText(file);
+        }
+
+        hitungSemuaTotalBaris();
+        kalkulasiDasbor();
+    </script>
+</body>
+</html>
