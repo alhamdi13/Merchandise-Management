@@ -174,6 +174,7 @@
                                 <th class="py-3 px-4">Topi</th>
                                 <th class="py-3 px-4">Tumbler</th>
                                 <th class="py-3 px-4">Ukuran</th>
+                                <th class="py-3 px-4">Lengan</th>
                                 <th class="py-3 px-4">Warna</th>
                                 <th class="py-3 px-4">Total (Rp)</th>
                                 <th class="py-3 px-4">No HP</th>
@@ -196,6 +197,12 @@
                                     </select>
                                 </td>
                                 <td class="py-3 px-4">
+                                    <select class="jenis-lengan border border-gray-300 rounded p-1" onchange="hitungSemuaTotalBaris(); kalkulasiDasbor()">
+                                        <option value="0">Pendek</option>
+                                        <option value="10000">Panjang (+10rb)</option>
+                                    </select>
+                                </td>
+                                <td class="py-3 px-4">
                                     <select class="border border-gray-300 rounded p-1">
                                         <option value="Light Brown">Light Brown</option>
                                         <option value="Orange Bata">Orange Bata</option>
@@ -211,39 +218,6 @@
                                     <select class="border border-gray-300 rounded p-1 font-bold text-green-600" onchange="this.className = this.value === 'Lunas' ? 'border border-gray-300 rounded p-1 font-bold text-green-600' : 'border border-gray-300 rounded p-1 font-bold text-red-500'; kalkulasiDasbor();">
                                         <option value="Lunas" selected>Lunas</option>
                                         <option value="Belum">Belum</option>
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="py-3 px-4" contenteditable="true">2</td>
-                                <td class="py-3 px-4" contenteditable="true">fendri amir</td>
-                                <td class="py-3 px-4" contenteditable="true">2003</td>
-                                <td class="py-3 px-4 item-count" contenteditable="true">2</td>
-                                <td class="py-3 px-4 item-count" contenteditable="true">2</td>
-                                <td class="py-3 px-4 item-count" contenteditable="true">0</td>
-                                <td class="py-3 px-4">
-                                    <select class="ukuran-baju border border-gray-300 rounded p-1" onchange="hitungSemuaTotalBaris(); kalkulasiDasbor()">
-                                        <option value="0">S/M/L/XL</option>
-                                        <option value="10000">XXL (+10rb)</option>
-                                        <option value="15000">XXXL (+15rb)</option>
-                                    </select>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <select class="border border-gray-300 rounded p-1">
-                                        <option value="Light Brown">Light Brown</option>
-                                        <option value="Orange Bata">Orange Bata</option>
-                                        <option value="Putih">Putih</option>
-                                        <option value="Hitam">Hitam</option>
-                                        <option value="Beige">Beige</option>
-                                        <option value="Cream">Cream</option>
-                                    </select>
-                                </td>
-                                <td class="py-3 px-4 item-total font-bold" contenteditable="true">340000</td>
-                                <td class="py-3 px-4" contenteditable="true">+62 857-6070-5898</td>
-                                <td class="py-3 px-4 text-center">
-                                    <select class="border border-gray-300 rounded p-1 font-bold text-red-500" onchange="this.className = this.value === 'Lunas' ? 'border border-gray-300 rounded p-1 font-bold text-green-600' : 'border border-gray-300 rounded p-1 font-bold text-red-500'; kalkulasiDasbor();">
-                                        <option value="Lunas">Lunas</option>
-                                        <option value="Belum" selected>Belum</option>
                                     </select>
                                 </td>
                             </tr>
@@ -273,6 +247,7 @@
                                 <th class="py-3 px-4">Topi</th>
                                 <th class="py-3 px-4">Tumbler</th>
                                 <th class="py-3 px-4">Ukuran</th>
+                                <th class="py-3 px-4">Lengan</th>
                                 <th class="py-3 px-4">Warna</th>
                                 <th class="py-3 px-4">Keterangan</th>
                             </tr>
@@ -290,6 +265,12 @@
                                         <option value="0">S/M/L/XL</option>
                                         <option value="10000">XXL</option>
                                         <option value="15000">XXXL</option>
+                                    </select>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <select class="border border-gray-300 rounded p-1">
+                                        <option value="0">Pendek</option>
+                                        <option value="10000">Panjang</option>
                                     </select>
                                 </td>
                                 <td class="py-3 px-4">
@@ -451,7 +432,10 @@
                     const selectUkuran = tr.querySelector('.ukuran-baju');
                     const extraBiaya = selectUkuran ? parseInt(selectUkuran.value) || 0 : 0;
                     
-                    const total = (qtyBaju * 110000) + (qtyBaju * extraBiaya) + (qtyTopi * 60000) + (qtyTumbler * 90000);
+                    const selectLengan = tr.querySelector('.jenis-lengan');
+                    const extraLengan = selectLengan ? parseInt(selectLengan.value) || 0 : 0;
+                    
+                    const total = (qtyBaju * 110000) + (qtyBaju * extraBiaya) + (qtyBaju * extraLengan) + (qtyTopi * 60000) + (qtyTumbler * 90000);
                     
                     const totalCell = tr.querySelector('.item-total');
                     if (totalCell && total > 0) {
@@ -477,8 +461,8 @@
             tr.className = "border-b hover:bg-gray-50";
             
             let columns = 4;
-            if (tabelId === 'tabel-pembeli') columns = 11;
-            if (tabelId === 'tabel-freegift') columns = 9;
+            if (tabelId === 'tabel-pembeli') columns = 12;
+            if (tabelId === 'tabel-freegift') columns = 10;
 
             let html = '';
             for(let i=0; i<columns; i++) {
@@ -486,9 +470,9 @@
                 
                 if (tabelId === 'tabel-pembeli') {
                     if(i >= 3 && i <= 5) kelas += " item-count";
-                    if(i === 8) kelas += " item-total font-bold";
+                    if(i === 9) kelas += " item-total font-bold";
                     
-                    if(i === 10) {
+                    if(i === 11) {
                         html += `<td class="py-3 px-4 text-center">
                             <select class="border border-gray-300 rounded p-1 font-bold text-red-500" onchange="this.className = this.value === 'Lunas' ? 'border border-gray-300 rounded p-1 font-bold text-green-600' : 'border border-gray-300 rounded p-1 font-bold text-red-500'; kalkulasiDasbor();">
                                 <option value="Belum" selected>Belum</option>
@@ -509,6 +493,15 @@
                         continue;
                     }
                     if(i === 7) {
+                        html += `<td class="${kelas}">
+                            <select class="jenis-lengan border border-gray-300 rounded p-1" onchange="hitungSemuaTotalBaris(); kalkulasiDasbor()">
+                                <option value="0">Pendek</option>
+                                <option value="10000">Panjang (+10rb)</option>
+                            </select>
+                        </td>`;
+                        continue;
+                    }
+                    if(i === 8) {
                         html += `<td class="${kelas}">
                             <select class="border border-gray-300 rounded p-1">
                                 <option value="Light Brown">Light Brown</option>
@@ -535,6 +528,15 @@
                         continue;
                     }
                     if(i === 7) {
+                        html += `<td class="${kelas}">
+                            <select class="border border-gray-300 rounded p-1">
+                                <option value="0">Pendek</option>
+                                <option value="10000">Panjang</option>
+                            </select>
+                        </td>`;
+                        continue;
+                    }
+                    if(i === 8) {
                         html += `<td class="${kelas}">
                             <select class="border border-gray-300 rounded p-1">
                                 <option value="Light Brown">Light Brown</option>
@@ -588,11 +590,10 @@
                     }
                 }
 
-                // Kalkulasi Lunas atau Belum Lunas
                 const tds = tr.querySelectorAll('td');
-                if (tds.length >= 11 && !isNaN(val)) {
-                    const statusSelect = tds[10].querySelector('select');
-                    const statusText = statusSelect ? statusSelect.value : tds[10].innerText.trim();
+                if (tds.length >= 12 && !isNaN(val)) {
+                    const statusSelect = tds[11].querySelector('select');
+                    const statusText = statusSelect ? statusSelect.value : tds[11].innerText.trim();
                     if (statusText === 'Lunas') {
                         totalPendapatanLunas += val;
                     } else {
@@ -742,10 +743,10 @@
                 return td.innerText.trim() || '-';
             };
 
-            let htmlPembeli = '<table><thead><tr><th>Nama</th><th class="text-center">Baju</th><th class="text-center">Topi</th><th class="text-center">Tumbler</th><th>Ukuran</th><th>Warna</th><th class="text-right">Total (Rp)</th><th class="text-center">Status</th></tr></thead><tbody>';
+            let htmlPembeli = '<table><thead><tr><th>Nama</th><th class="text-center">Baju</th><th class="text-center">Topi</th><th class="text-center">Tumbler</th><th>Ukuran</th><th>Lengan</th><th>Warna</th><th class="text-right">Total (Rp)</th><th class="text-center">Status</th></tr></thead><tbody>';
             document.querySelectorAll('#tabel-pembeli tbody tr').forEach(tr => {
                 const tds = tr.querySelectorAll('td');
-                if(tds.length < 11) return;
+                if(tds.length < 12) return;
                 htmlPembeli += `<tr>
                     <td>${getVal(tds[1])}</td>
                     <td class="text-center">${getVal(tds[3])}</td>
@@ -753,17 +754,18 @@
                     <td class="text-center">${getVal(tds[5])}</td>
                     <td>${getVal(tds[6])}</td>
                     <td>${getVal(tds[7])}</td>
-                    <td class="text-right font-bold">${getVal(tds[8])}</td>
-                    <td class="text-center font-bold">${getVal(tds[10])}</td>
+                    <td>${getVal(tds[8])}</td>
+                    <td class="text-right font-bold">${getVal(tds[9])}</td>
+                    <td class="text-center font-bold">${getVal(tds[11])}</td>
                 </tr>`;
             });
             htmlPembeli += '</tbody></table>';
             document.getElementById('print-tabel-pembeli').innerHTML = htmlPembeli;
 
-            let htmlFree = '<table><thead><tr><th>Penerima</th><th>Kategori</th><th class="text-center">Baju</th><th class="text-center">Topi</th><th class="text-center">Tumbler</th><th>Ukuran</th><th>Warna</th></tr></thead><tbody>';
+            let htmlFree = '<table><thead><tr><th>Penerima</th><th>Kategori</th><th class="text-center">Baju</th><th class="text-center">Topi</th><th class="text-center">Tumbler</th><th>Ukuran</th><th>Lengan</th><th>Warna</th></tr></thead><tbody>';
             document.querySelectorAll('#tabel-freegift tbody tr').forEach(tr => {
                 const tds = tr.querySelectorAll('td');
-                if(tds.length < 9) return;
+                if(tds.length < 10) return;
                 htmlFree += `<tr>
                     <td>${getVal(tds[1])}</td>
                     <td>${getVal(tds[2])}</td>
@@ -772,6 +774,7 @@
                     <td class="text-center">${getVal(tds[5])}</td>
                     <td>${getVal(tds[6])}</td>
                     <td>${getVal(tds[7])}</td>
+                    <td>${getVal(tds[8])}</td>
                 </tr>`;
             });
             htmlFree += '</tbody></table>';
@@ -838,6 +841,12 @@
                                         <option value="0">S/M/L/XL</option>
                                         <option value="10000">XXL (+10rb)</option>
                                         <option value="15000">XXXL (+15rb)</option>
+                                    </select>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <select class="jenis-lengan border border-gray-300 rounded p-1" onchange="hitungSemuaTotalBaris(); kalkulasiDasbor()">
+                                        <option value="0">Pendek</option>
+                                        <option value="10000">Panjang (+10rb)</option>
                                     </select>
                                 </td>
                                 <td class="py-3 px-4">
